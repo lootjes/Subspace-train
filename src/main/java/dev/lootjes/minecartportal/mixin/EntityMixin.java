@@ -74,6 +74,7 @@ public abstract class EntityMixin implements EntityDuck {
     public Entity customMovePassengerToWorld(ServerWorld destination, TeleportTarget teleportTarget) {
         if (this.world instanceof ServerWorld && !this.isRemoved()) {
             this.world.getProfiler().push("changeDimension");
+            List<Entity> passangers = List.copyOf(((Entity)(Object)this).getPassengerList());
             this.detach();
             this.world.getProfiler().push("reposition");
             if (teleportTarget == null) {
@@ -88,6 +89,10 @@ public abstract class EntityMixin implements EntityDuck {
                     destination.onDimensionChanged(entity);
                     if (destination.getRegistryKey() == World.END) {
                         ServerWorld.createEndSpawnPlatform(destination);
+                    }
+                    for (Entity entity2 : passangers) {
+                        ((EntityDuck) entity2).customMovePassengerToWorld(destination, teleportTarget);
+                        entity2.startRiding(entity, true);
                     }
                 }
 
